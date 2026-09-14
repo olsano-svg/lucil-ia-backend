@@ -251,6 +251,11 @@ export const ChatScreen = ({ navigation }: any) => {
             await memoryService.deleteMemory(id);
             await loadMemories();
             showToast("Recuerdo eliminado de la memoria.");
+        } catch (err) {
+            console.error("Error borrando memoria:", err);
+        }
+    };
+
     // --- LÓGICA DE VOZ EN TIEMPO REAL (LIVE VOICE CON INTERRUPCIÓN / BARGE-IN) ---
     const speakLive = (textToSpeak: string, onComplete?: () => void) => {
         if (typeof window === 'undefined' || !window.speechSynthesis) {
