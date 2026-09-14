@@ -1,0 +1,36 @@
+﻿# Entorno virtual de Python
+backend/venv/
+venv/
+*.venv
+ENV/
+env/
+
+# Node / React Native / Expo
+mobile/node_modules/
+node_modules/
+mobile/.expo/
+.expo/
+mobile/web-build/
+dist/
+
+# Python Cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Logs y temporales
+*.log
+*.tmp
+.DS_Store
+Thumbs.db
+
+# Bases de datos y modelos pesados locales
+*.db
+*.sqlite
+*.sqlite3
+lucil_personal.db
+backend/lucil_personal.db
