@@ -22,3 +22,4 @@ pandas
 openpyxl
 greenlet
 email-validator
+langchain-openai
