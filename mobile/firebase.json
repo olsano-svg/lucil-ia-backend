@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "site": "lucileai-app-2026",
     "public": "dist",
     "ignore": [
       "firebase.json",
