@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { authService } from '../services/api';
+import { authService, API_BASE_URL } from '../services/api';
 import { colors } from '../theme/colors';
 
 export const LoginScreen = ({ navigation }: any) => {
@@ -10,6 +10,8 @@ export const LoginScreen = ({ navigation }: any) => {
     const [isLogin, setIsLogin] = useState(true);
     const [loading, setLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+    const isCloud = API_BASE_URL.includes('onrender.com');
 
     const handleAuth = async () => {
         if (!email || !password) {
@@ -32,7 +34,7 @@ export const LoginScreen = ({ navigation }: any) => {
             }
         } catch (error: any) {
             console.error(error);
-            const msg = error.response?.data?.detail || error.message || 'Error de conexión con el backend local';
+            const msg = error.response?.data?.detail || error.message || 'Error de conexión con el servidor backend';
             setErrorMessage(msg);
         } finally {
             setLoading(false);
@@ -47,7 +49,7 @@ export const LoginScreen = ({ navigation }: any) => {
             navigation.replace('Chat');
         } catch (error: any) {
             console.error(error);
-            setErrorMessage('No se pudo conectar automáticamente con el servidor local');
+            setErrorMessage('No se pudo conectar con el servidor backend. Verifica que el servicio esté activo.');
         } finally {
             setLoading(false);
         }
@@ -58,11 +60,13 @@ export const LoginScreen = ({ navigation }: any) => {
             <View style={styles.card}>
                 <View style={styles.statusBadge}>
                     <Text style={styles.statusDot}>●</Text>
-                    <Text style={styles.statusText}>Backend Local Activo (Puerto 8081)</Text>
+                    <Text style={styles.statusText}>
+                        {isCloud ? 'Backend Cloud Activo (Render)' : 'Backend Local Activo'}
+                    </Text>
                 </View>
 
                 <Text style={styles.title}>✨ Lucil AI</Text>
-                <Text style={styles.subtitle}>Asistente Personal 100% Local & Privado</Text>
+                <Text style={styles.subtitle}>Asistente Personal Inteligente</Text>
                 
                 {errorMessage && (
                     <View style={styles.errorBox}>

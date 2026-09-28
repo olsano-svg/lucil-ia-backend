@@ -29,6 +29,10 @@ class Settings(BaseSettings):
             "http://127.0.0.1:8000",
             "http://127.0.0.1:8081",
             "http://127.0.0.1:8082",
+            "https://lucileAI-app-2026.web.app",
+            "https://lucileai-app-2026.web.app",
+            "https://lucileAI-app-2026.firebaseapp.com",
+            "https://lucileai-app-2026.firebaseapp.com",
             "https://lucile-ai.web.app",
             "https://lucile-ai.firebaseapp.com",
             "https://lucil-ia.web.app",
@@ -36,10 +40,13 @@ class Settings(BaseSettings):
             "https://lucile-ia.web.app",
             "https://lucile-ia.firebaseapp.com"
         ]
+        origins = list(default_local_origins)
         if self.ALLOWED_ORIGINS and self.ALLOWED_ORIGINS.strip():
             parsed = [origin.strip() for origin in self.ALLOWED_ORIGINS.split(",") if origin.strip()]
-            return parsed
-        return default_local_origins
+            for p in parsed:
+                if p not in origins:
+                    origins.append(p)
+        return origins
     
     # Database - Defaulting to SQLite for personal use, compatible with Cloud PostgreSQL (Supabase/Neon/Render)
     DATABASE_URL: str = f"sqlite+aiosqlite:///{DB_FILE.as_posix()}"

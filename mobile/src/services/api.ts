@@ -5,7 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 export const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || (
     Platform.OS === 'web' 
         ? (typeof window !== 'undefined' && window.location?.hostname && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1'
-            ? 'https://lucil-ai-backend.onrender.com/api/v1' 
+            ? 'https://lucil-ia-backend.onrender.com/api/v1' 
             : 'http://localhost:8081/api/v1')
         : 'http://192.168.68.100:8081/api/v1'
 ); 
