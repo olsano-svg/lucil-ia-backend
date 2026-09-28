@@ -32,7 +32,9 @@ class Settings(BaseSettings):
             "https://lucile-ai.web.app",
             "https://lucile-ai.firebaseapp.com",
             "https://lucil-ia.web.app",
-            "https://lucil-ia.firebaseapp.com"
+            "https://lucil-ia.firebaseapp.com",
+            "https://lucile-ia.web.app",
+            "https://lucile-ia.firebaseapp.com"
         ]
         if self.ALLOWED_ORIGINS and self.ALLOWED_ORIGINS.strip():
             parsed = [origin.strip() for origin in self.ALLOWED_ORIGINS.split(",") if origin.strip()]
