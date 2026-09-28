@@ -58,7 +58,7 @@ export const LoginScreen = ({ navigation }: any) => {
             <View style={styles.card}>
                 <View style={styles.statusBadge}>
                     <Text style={styles.statusDot}>●</Text>
-                    <Text style={styles.statusText}>Backend Local Activo (Puerto 8000)</Text>
+                    <Text style={styles.statusText}>Backend Local Activo (Puerto 8081)</Text>
                 </View>
 
                 <Text style={styles.title}>✨ Lucil AI</Text>

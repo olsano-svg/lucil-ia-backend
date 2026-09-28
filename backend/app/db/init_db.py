@@ -7,14 +7,15 @@ from app.models.project import Project
 from app.models.conversation import Conversation, Message
 from app.models.memory import MemoryItem
 from app.core.security import get_password_hash
+from app.core.config import settings
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 async def init_admin_user():
     """Asegura que el usuario administrador inicial exista con hash seguro."""
-    admin_username = "admin"
-    admin_pass = "delarosa00"
+    admin_username = settings.ADMIN_USERNAME
+    admin_pass = settings.ADMIN_PASSWORD
 
     async with AsyncSessionLocal() as db:
         res = await db.execute(

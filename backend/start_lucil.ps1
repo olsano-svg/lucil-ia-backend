@@ -57,5 +57,5 @@ Write-Host "Inicializando base de datos local (SQLite)..."
 alembic upgrade head
 
 # 4. Iniciar Servidor
-Write-Host "Iniciando el cerebro de Lucil AI en el puerto 8000..." -ForegroundColor Green
-uvicorn app.main:app --host 0.0.0.0 --port 8000
+Write-Host "Iniciando el cerebro de Lucil AI en el puerto 8081..." -ForegroundColor Green
+uvicorn app.main:app --host 0.0.0.0 --port 8081

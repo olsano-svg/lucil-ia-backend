@@ -69,7 +69,18 @@ async def add_message(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    cid = uuid.UUID(conversation_id) if isinstance(conversation_id, str) else conversation_id
+    try:
+        cid = uuid.UUID(conversation_id) if isinstance(conversation_id, str) else conversation_id
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid conversation UUID")
+
+    # Verificar que la conversación pertenece al usuario autenticado
+    conv_check = await db.execute(
+        select(Conversation).join(Project).filter(Conversation.id == cid, Project.user_id == current_user.id)
+    )
+    if not conv_check.scalars().first():
+        raise HTTPException(status_code=404, detail="Conversation not found or access denied")
+
     user_msg = Message(conversation_id=cid, role=msg_in.role, content=msg_in.content)
     db.add(user_msg)
     await db.commit()
@@ -83,7 +94,12 @@ async def add_message(
         enable_web_search=getattr(msg_in, "enable_web_search", False) or False
     )
     
-    response_content = await llm.generate_response(msg_in.content, context)
+    try:
+        response_content = await llm.generate_response(msg_in.content, context)
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).error(f"Error generando respuesta LLM: {e}")
+        response_content = f"Lo siento, ocurrió un problema al procesar la respuesta con el motor de IA: {str(e)}"
     
     lucil_msg = Message(conversation_id=cid, role="assistant", content=response_content)
     db.add(lucil_msg)
@@ -98,7 +114,18 @@ async def stream_message(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    cid = uuid.UUID(conversation_id) if isinstance(conversation_id, str) else conversation_id
+    try:
+        cid = uuid.UUID(conversation_id) if isinstance(conversation_id, str) else conversation_id
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid conversation UUID")
+
+    # Verificar que la conversación pertenece al usuario autenticado
+    conv_check = await db.execute(
+        select(Conversation).join(Project).filter(Conversation.id == cid, Project.user_id == current_user.id)
+    )
+    if not conv_check.scalars().first():
+        raise HTTPException(status_code=404, detail="Conversation not found or access denied")
+
     user_msg = Message(conversation_id=cid, role=msg_in.role, content=msg_in.content)
     db.add(user_msg)
     await db.commit()
@@ -114,12 +141,19 @@ async def stream_message(
 
     async def event_generator():
         full_response = ""
-        if llm:
-            async for chunk in llm.generate_stream(msg_in.content, context):
-                full_response += chunk
-                yield f"data: {chunk}\n\n"
-        else:
-            yield "data: Error: No LLM provider configured.\n\n"
+        try:
+            if llm:
+                async for chunk in llm.generate_stream(msg_in.content, context):
+                    full_response += chunk
+                    yield f"data: {chunk}\n\n"
+            else:
+                yield "data: Error: No LLM provider configured.\n\n"
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).error(f"Error en streaming LLM: {e}")
+            err_msg = f"\n[Error al generar respuesta con el motor de IA: {str(e)}]"
+            full_response += err_msg
+            yield f"data: {err_msg}\n\n"
             
         yield "data: [DONE]\n\n"
 
@@ -174,12 +208,19 @@ async def get_conversation(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    result = await db.execute(select(Conversation).filter(Conversation.id == conversation_id))
+    try:
+        cid = uuid.UUID(conversation_id) if isinstance(conversation_id, str) else conversation_id
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid conversation UUID")
+
+    result = await db.execute(
+        select(Conversation).join(Project).filter(Conversation.id == cid, Project.user_id == current_user.id)
+    )
     conv = result.scalars().first()
     if not conv:
-        raise HTTPException(status_code=404, detail="Conversation not found")
+        raise HTTPException(status_code=404, detail="Conversation not found or access denied")
         
-    msg_result = await db.execute(select(Message).filter(Message.conversation_id == conversation_id).order_by(Message.created_at))
+    msg_result = await db.execute(select(Message).filter(Message.conversation_id == cid).order_by(Message.created_at))
     conv.messages = msg_result.scalars().all()
     
     return conv

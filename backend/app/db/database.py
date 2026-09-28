@@ -5,7 +5,7 @@ from app.core.config import settings
 
 # Engine asíncrono para mejor rendimiento en FastAPI
 engine = create_async_engine(
-    settings.DATABASE_URL,
+    settings.ASYNC_DATABASE_URL,
     echo=False,
     future=True,
     pool_pre_ping=True,

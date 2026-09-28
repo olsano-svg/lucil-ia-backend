@@ -2,9 +2,13 @@ import axios from 'axios';
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export const API_BASE_URL = Platform.OS === 'web' 
-    ? (typeof window !== 'undefined' && window.location?.hostname ? `http://${window.location.hostname}:8000/api/v1` : 'http://localhost:8000/api/v1')
-    : 'http://192.168.68.100:8000/api/v1'; 
+export const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || (
+    Platform.OS === 'web' 
+        ? (typeof window !== 'undefined' && window.location?.hostname && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1'
+            ? 'https://lucil-ai-backend.onrender.com/api/v1' 
+            : 'http://localhost:8081/api/v1')
+        : 'http://192.168.68.100:8081/api/v1'
+); 
 
 export const apiClient = axios.create({
     baseURL: API_BASE_URL,
@@ -28,23 +32,27 @@ export const authService = {
         const response = await apiClient.post('/auth/login', formData.toString(), {
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
         });
+        if (response.data && response.data.access_token) {
+            await AsyncStorage.setItem('token', response.data.access_token);
+        }
         return response.data;
     },
     register: async (email: string, password: string) => {
         const response = await apiClient.post('/auth/register', { email, password });
         return response.data;
     },
+    logout: async () => {
+        await AsyncStorage.removeItem('token');
+    },
     quickLogin: async () => {
         const defaultEmail = "admin";
         const defaultPass = "delarosa00";
         try {
             const res = await authService.login(defaultEmail, defaultPass);
-            await AsyncStorage.setItem('token', res.access_token);
             return res;
         } catch {
             await authService.register(defaultEmail, defaultPass);
             const res = await authService.login(defaultEmail, defaultPass);
-            await AsyncStorage.setItem('token', res.access_token);
             return res;
         }
     }
