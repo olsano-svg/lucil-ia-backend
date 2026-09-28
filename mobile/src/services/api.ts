@@ -130,12 +130,17 @@ export const chatService = {
                 for (const line of lines) {
                     const trimmed = line.trim();
                     if (trimmed.startsWith("data: ")) {
-                        const data = trimmed.slice(6);
-                        if (data === "[DONE]") {
+                        const rawData = trimmed.slice(6);
+                        if (rawData === "[DONE]") {
                             onDone();
                             return;
                         }
-                        onChunk(data);
+                        try {
+                            const chunk = JSON.parse(rawData);
+                            onChunk(chunk);
+                        } catch {
+                            onChunk(rawData);
+                        }
                     }
                 }
             }

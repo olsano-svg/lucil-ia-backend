@@ -140,20 +140,22 @@ async def stream_message(
     )
 
     async def event_generator():
+        import json
         full_response = ""
         try:
             if llm:
                 async for chunk in llm.generate_stream(msg_in.content, context):
                     full_response += chunk
-                    yield f"data: {chunk}\n\n"
+                    yield f"data: {json.dumps(chunk)}\n\n"
             else:
-                yield "data: Error: No LLM provider configured.\n\n"
+                err_str = "Error: No LLM provider configured."
+                yield f"data: {json.dumps(err_str)}\n\n"
         except Exception as e:
             import logging
             logging.getLogger(__name__).error(f"Error en streaming LLM: {e}")
             err_msg = f"\n[Error al generar respuesta con el motor de IA: {str(e)}]"
             full_response += err_msg
-            yield f"data: {err_msg}\n\n"
+            yield f"data: {json.dumps(err_msg)}\n\n"
             
         yield "data: [DONE]\n\n"
 
